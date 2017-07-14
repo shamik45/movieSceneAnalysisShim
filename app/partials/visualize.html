@@ -31,14 +31,34 @@
                 <div id="wordsCloud">
                     <word-cloud words=words width=700 height=700
                                 padding="10"
-                                rotate="appCtrl.rotate"
-                                on-click="appCtrl.wordClicked">
+                                rotate=rotate
+                                on-click=wordClicked>
                     </word-cloud>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Doughnut graph of labels for {{currentChoice}}</h3>
+            </div>
+            <div class="panel-body">
+
+            <p>{{selectedWord.text}}</p>
+            <br>
+            <p>{{selectedWord.size}}</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <br>
 <br>
 

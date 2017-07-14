@@ -28,6 +28,7 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
     }
   });
 
+
   $scope.words = [];
   var self = this;
   self.height = $window.innerHeight * 0.5;
@@ -40,13 +41,18 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
   console.log(self.height);
   console.log(self.width);
 
-  function rotate(){
+  $scope.rotate = function() {
     return ~~(Math.random() * 2) * 90;
   }
 
+
   //custom rotate
-  function wordClicked(word){
-    alert(word);
+  $scope.wordClicked= function(word){
+    //alert(word.text + word.size);
+    $scope.selectedWord = new Object();
+    $scope.selectedWord.text = word.text;
+    $scope.selectedWord.size = word.size;
+    console.log("word clicked");
   }
 
 
