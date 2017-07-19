@@ -1,4 +1,4 @@
-msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
+msApp.controller('VisualizeCtrl', function($q,$scope, es) {
 
   $scope.mediaIdList = [];
   //get list of all media
@@ -10,7 +10,7 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
           "aggs" : {
             "medias" : {
               "terms" : {
-                "field" : "id.keyword",
+                "field" : "title.keyword",
                 "size" : 2000
               }
             }
@@ -30,29 +30,25 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
 
 
   $scope.words = [];
-  var self = this;
-  self.height = $window.innerHeight * 0.5;
-  self.width = $window.innerWidth * 0.5
 
-  $scope.words = [
-    {text: 'Angular',size: 25,color: '#0e6632'},
-    {text: 'Angular2',size: 35,color: '#0e558'}
-  ]
-  console.log(self.height);
-  console.log(self.width);
+  $scope.height = 700;
+  $scope.width = 500;
+
 
   $scope.rotate = function() {
     return ~~(Math.random() * 2) * 90;
   }
 
+  $scope.selectedWord = "";
 
   //custom rotate
+
   $scope.wordClicked= function(word){
     //alert(word.text + word.size);
-    $scope.selectedWord = new Object();
+
     $scope.selectedWord.text = word.text;
     $scope.selectedWord.size = word.size;
-    console.log("word clicked");
+    console.log("word clicked " + word.text + " with size " + word.size);
   }
 
 
@@ -74,7 +70,7 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
               "label": {
                 "filter": {
                   "match": {
-                    "id": stArray[stArray.length -1 ]
+                    "title": choice
                   }
                 },
                 "aggs": {
@@ -95,9 +91,12 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
     ).then(
         function (response)
         {
-          $scope.response = response;
+          //$scope.response = response;
+            console.log("processing response")
 
-          for (var loop = 0; loop < response.aggregations.label.labels.buckets.length; loop++)
+
+            for (var loop = 0; loop < (response.aggregations.label.labels.buckets.length); loop++)
+            //for (var loop = 0; loop < 3; loop++)
           {
             $scope.labels[loop] = response.aggregations.label.labels.buckets[loop].key;
             $scope.data[loop] = response.aggregations.label.labels.buckets[loop].doc_count;
@@ -105,15 +104,12 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
             var b = new Object();
             b.text = response.aggregations.label.labels.buckets[loop].key;
             b.size = response.aggregations.label.labels.buckets[loop].doc_count;
-            //b.color = '#0e558';
 
             $scope.words[loop] = b;
 
-            /*$scope.words[loop].text =response.aggregations.label.labels.buckets[loop].key;
-            $scope.words[loop].size =response.aggregations.label.labels.buckets[loop].doc_count;
-            $scope.words[loop].color = '#0e558';
-            */
           }
+
+          console.log($scope.words)
         });
 
 
@@ -121,5 +117,93 @@ msApp.controller('VisualizeCtrl', function($q,$scope, es, $window) {
 
 
 
+
+});
+
+
+
+msApp.controller('SpeechSearchCtrl', function($scope, es){
+
+    this.rec = new webkitSpeechRecognition();
+    this.interim = [];
+    this.final = '';
+    var self = this;
+
+    this.rec.continuous = false;
+    this.rec.lang = 'en-US';
+    this.rec.interimResults = true;
+    this.rec.onerror = function(event) {
+        console.log('error!');
+    };
+
+    this.start = function() {
+        self.rec.start();
+    };
+
+    $scope.labels = [];
+    $scope.data = [];
+
+
+    this.rec.onresult = function(event) {
+        self.final = "";
+        for(var i = event.resultIndex; i < event.results.length; i++) {
+            if(event.results[i].isFinal) {
+
+                self.final = self.final.concat(event.results[i][0].transcript);
+                console.log(event.results[i][0].transcript);
+                $scope.$apply();
+
+                es.search(
+                    {
+                        index: 'movie',
+                        size: 0,
+                        body: {
+                            "aggs": {
+                                "label": {
+                                    "filter": {
+                                        "match": {
+                                            "label": self.final
+                                        }
+                                    },
+                                    "aggs": {
+                                        "labels": {
+                                            "terms": {
+                                                "field": "title.keyword",
+                                                "size" : 25
+                                            }
+
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+
+                    }
+                ).then(
+                    function (response)
+                    {
+                        //$scope.response = response;
+                        console.log("processing response")
+
+
+                        for (var loop = 0; loop < (response.aggregations.label.labels.buckets.length); loop++)
+                            //for (var loop = 0; loop < 3; loop++)
+                        {
+                            console.log(response.aggregations.label.labels.buckets[loop].key);
+                            console.log(response.aggregations.label.labels.buckets[loop].doc_count);
+
+                            $scope.labels[loop] = response.aggregations.label.labels.buckets[loop].key;
+                            $scope.data[loop] = response.aggregations.label.labels.buckets[loop].doc_count;
+
+                        }
+
+                        //console.log($scope.words)
+                    });
+
+
+            }
+        }
+    };
 
 });

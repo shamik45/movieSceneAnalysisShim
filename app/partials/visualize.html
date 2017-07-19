@@ -25,12 +25,12 @@
 
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">Doughnut graph of labels for {{currentChoice}}</h3>
+                <h3 class="panel-title">Tag Cloud graph of labels for {{currentChoice}}</h3>
             </div>
             <div class="panel-body">
                 <div id="wordsCloud">
-                    <word-cloud words=words width=700 height=700
-                                padding="10"
+                    <word-cloud words=words width=width height=height
+                                padding="0"
                                 rotate=rotate
                                 on-click=wordClicked>
                     </word-cloud>
@@ -44,9 +44,15 @@
     <div class="col-md-9">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">Doughnut graph of labels for {{currentChoice}}</h3>
+                <h3 class="panel-title">Histrogram graph of labels for {{currentChoice}}</h3>
             </div>
             <div class="panel-body">
+
+                <canvas id="bar" class="chart chart-bar"
+                        chart-data="data" chart-labels="labels" chart-series="series">
+                </canvas>
+
+
 
             <p>{{selectedWord.text}}</p>
             <br>
@@ -61,24 +67,3 @@
 
 <br>
 <br>
-
-<!--
-<div class="row">
-    <div class="col-md-9">
-
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">Doughnut graph of labels for {{currentChoice}}</h3>
-    </div>
-    <div class="panel-body">
-        <canvas id="doughnut" class="chart chart-doughnut"
-                chart-data="data" chart-labels="labels">
-        </canvas>
-    </div>
-</div>
-
-
-    -->
-
-
-
